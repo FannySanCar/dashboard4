@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SOC Dashboard — Gobierno de la República de Honduras</title>
+<link href="https://fonts.googleapis.com/css2?family=Georgia&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --gold:      #ad8411;
+    --gold-light:#c9a035;
+    --gold-pale: #f5ead0;
+    --navy:      #1a3a6b;
+    --navy-dark: #0f2447;
+    --navy-light:#2451a0;
+    --black:     #231f20;
+    --white:     #ffffff;
+    --gray-bg:   #f0f2f5;
+    --gray-card: #ffffff;
+    --gray-text: #555;
+    --red:       #c0392b;
+    --orange:    #e67e22;
+    --green:     #27ae60;
+    --blue-mid:  #2980b9;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--gray-bg);
+    color: var(--black);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--navy-dark);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    background: var(--gold);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-brand .escudo {
+    width: 64px; height: 64px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    
+    border: 2px solid rgba(255,255,255,0.4); overflow: hidden; padding: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .sidebar-brand h2 {
+    color: var(--white);
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+  }
+  .sidebar-brand p {
+    color: rgba(255,255,255,0.8);
+    font-size: 9px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .sidebar-divider {
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    margin: 0;
+  }
+  .sidebar-section {
+    padding: 16px 0 8px;
+  }
+  .sidebar-section-label {
+    color: rgba(255,255,255,0.35);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0 18px 8px;
+  }
+  .sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 18px;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all .2s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    background: rgba(173,132,17,.15);
+    color: var(--gold-light);
+    border-left-color: var(--gold);
+  }
+  .sidebar nav a i { width: 16px; font-size: 13px; }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--navy);
+    padding: 0 28px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    border-bottom: 3px solid var(--gold);
+  }
+  .topbar-left h1 {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--white);
+    letter-spacing: 0.3px;
+  }
+  .topbar-left p {
+    font-size: 10px;
+    color: var(--gold-light);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .topbar-right .badge-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(173,132,17,0.4);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--gold-light);
+  }
+  .topbar-right .badge-live .dot {
+    width: 7px; height: 7px;
+    background: #27ae60;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%,100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:.5; transform:scale(1.3); }
+  }
+  .topbar-right .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--white); font-size: 12px;
+  }
+  .topbar-right .user-chip .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--white); font-weight: bold;
+  }
+
+  /* ── CONTENT ── */
+  .content { padding: 24px 28px; flex: 1; }
+
+  /* ── FILTERS ── */
+  .filters-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--white);
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  }
+  .filters-bar label {
+    font-size: 11px;
+    color: var(--gray-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 2px;
+  }
+  .filters-bar select, .filters-bar input {
+    border: 1px solid #d0c4a0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    color: var(--black);
+    background: var(--white);
+    outline: none;
+    transition: border .2s;
+    cursor: pointer;
+  }
+  .filters-bar select:focus, .filters-bar input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(173,132,17,.12);
+  }
+  .filters-bar .btn-filter {
+    background: var(--gold);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: background .2s;
+    margin-left: auto;
+  }
+  .filters-bar .btn-filter:hover { background: var(--gold-light); }
+  .filter-sep { width:1px; height:24px; background:#e0e0e0; }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .kpi-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px 14px 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    border-top: 4px solid var(--gold);
+    transition: transform .2s, box-shadow .2s;
+    cursor: default;
+  }
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.10);
+  }
+  .kpi-card.navy  { border-top-color: var(--navy); }
+  .kpi-card.red   { border-top-color: var(--red); }
+  .kpi-card.green { border-top-color: var(--green); }
+  .kpi-card.orange{ border-top-color: var(--orange); }
+  .kpi-card.blue  { border-top-color: var(--blue-mid); }
+  .kpi-card .kpi-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; margin-bottom: 10px;
+    background: var(--gold-pale); color: var(--gold);
+  }
+  .kpi-card.navy  .kpi-icon { background:#e8eef7; color:var(--navy); }
+  .kpi-card.red   .kpi-icon { background:#fce8e6; color:var(--red); }
+  .kpi-card.green .kpi-icon { background:#e6f7ee; color:var(--green); }
+  .kpi-card.orange.kpi-icon { background:#fef3e6; color:var(--orange); }
+  .kpi-card.blue  .kpi-icon { background:#e6f3fb; color:var(--blue-mid); }
+  .kpi-card .kpi-label {
+    font-size: 10px;
+    color: var(--gray-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--black);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-card .kpi-sub {
+    font-size: 10px;
+    color: var(--gray-text);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .kpi-card .kpi-sub .arrow-up   { color: var(--red); }
+  .kpi-card .kpi-sub .arrow-down { color: var(--green); }
+  .kpi-card .kpi-glow {
+    position: absolute;
+    bottom: -18px; right: -18px;
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    opacity: .07;
+    background: var(--gold);
+  }
+  .kpi-card.navy  .kpi-glow { background: var(--navy); }
+  .kpi-card.red   .kpi-glow { background: var(--red); }
+  .kpi-card.green .kpi-glow { background: var(--green); }
+
+  /* ── CHARTS ROW ── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1.1fr 0.9fr;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .chart-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 18px 18px 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  }
+  .chart-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .chart-card-header h3 {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--black);
+  }
+  .chart-card-header p {
+    font-size: 10px;
+    color: var(--gray-text);
+    margin-top: 2px;
+  }
+  .chart-badge {
+    background: var(--gold-pale);
+    color: var(--gold);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    border: 1px solid rgba(173,132,17,.2);
+  }
+  .chart-canvas-wrap { position: relative; }
+
+  /* ── BOTTOM ROW ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  }
+  .table-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .table-card-header h3 { font-size: 13px; font-weight: bold; color: var(--black); }
+  .table-card-header p  { font-size: 10px; color: var(--gray-text); margin-top:2px; }
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  thead tr { background: var(--navy); }
+  thead th {
+    color: var(--white);
+    padding: 9px 10px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  thead th:first-child { border-radius: 6px 0 0 6px; }
+  thead th:last-child  { border-radius: 0 6px 6px 0; }
+  tbody tr { border-bottom: 1px solid #f0f0f0; transition: background .15s; }
+  tbody tr:hover { background: #fdf8ee; }
+  tbody tr:nth-child(even) { background: #f8f9fb; }
+  tbody tr:nth-child(even):hover { background: #fdf8ee; }
+  tbody td { padding: 8px 10px; color: var(--black); white-space: nowrap; }
+  .sev-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+  .sev-critica  { background:#fce8e6; color:var(--red);      border:1px solid rgba(192,57,43,.2); }
+  .sev-alta     { background:#fef3e6; color:var(--orange);   border:1px solid rgba(230,126,34,.2); }
+  .sev-media    { background:#e6f3fb; color:var(--blue-mid); border:1px solid rgba(41,128,185,.2); }
+  .sev-baja     { background:#e6f7ee; color:var(--green);    border:1px solid rgba(39,174,96,.2); }
+  .estado-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+  .estado-cerrado   { background:#e6f7ee; color:var(--green); }
+  .estado-resuelto  { background:#e8eef7; color:var(--navy);  }
+  .estado-activo    { background:#fef3e6; color:var(--orange);}
+  .estado-contenido { background:#fce8e6; color:var(--red);   }
+
+  /* ── MINI CHARTS PANEL (right bottom) ── */
+  .mini-panel {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .mini-panel h3 { font-size: 13px; font-weight: bold; color: var(--black); margin-bottom: 4px; }
+  .mini-panel p  { font-size: 10px; color: var(--gray-text); }
+  .bar-item { display: flex; flex-direction: column; gap: 4px; }
+  .bar-item .bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--black); }
+  .bar-item .bar-label span:last-child { color: var(--gray-text); font-size: 10px; }
+  .bar-track { height: 7px; background: #eee; border-radius: 10px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--navy), var(--navy-light)); transition: width 1s ease; }
+  .bar-fill.gold { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    background: var(--navy-dark);
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 3px solid var(--gold);
+  }
+  .page-footer p { font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: .5px; }
+  .page-footer .stars { color: var(--gold); font-size: 11px; letter-spacing: 3px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .kpi-card    { animation: fadeUp .4s ease both; }
+  .kpi-card:nth-child(1){animation-delay:.05s}
+  .kpi-card:nth-child(2){animation-delay:.10s}
+  .kpi-card:nth-child(3){animation-delay:.15s}
+  .kpi-card:nth-child(4){animation-delay:.20s}
+  .kpi-card:nth-child(5){animation-delay:.25s}
+  .kpi-card:nth-child(6){animation-delay:.30s}
+  .chart-card  { animation: fadeUp .5s ease .35s both; }
+  .table-card  { animation: fadeUp .5s ease .45s both; }
+  .mini-panel  { animation: fadeUp .5s ease .50s both; }
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="escudo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Coat_of_arms_of_Honduras.svg/507px-Coat_of_arms_of_Honduras.svg.png"
+           alt="Escudo de Honduras" style="width:52px;height:auto;display:block;"/>
+    </div>
+    <h2>Gobierno de la República de Honduras</h2>
+    <p>2026 — 2030</p>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Navegación</div>
+    <nav>
+      <a href="#" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="#"><i class="fa-solid fa-triangle-exclamation"></i> Incidentes</a>
+      <a href="#"><i class="fa-solid fa-chart-bar"></i> Análisis</a>
+      <a href="#"><i class="fa-solid fa-users"></i> Analistas</a>
+      <a href="#"><i class="fa-solid fa-server"></i> Sistemas</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Informes</div>
+    <nav>
+      <a href="#"><i class="fa-solid fa-file-lines"></i> Reportes</a>
+      <a href="#"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
+      <a href="#"><i class="fa-solid fa-bell"></i> Alertas</a>
+      <a href="#"><i class="fa-solid fa-gear"></i> Configuración</a>
+    </nav>
+  </div>
+  <div class="sidebar-footer">
+    <div>Centro de Operaciones<br>de Ciberseguridad</div>
+    <div style="margin-top:6px;color:rgba(255,255,255,.2)">SOC · Período 2022–2024</div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Coat_of_arms_of_Honduras.svg/507px-Coat_of_arms_of_Honduras.svg.png" alt="Escudo" style="height:34px;vertical-align:middle;margin-right:10px;filter:brightness(0) invert(1);opacity:0.9"/>Centro de Operaciones de Ciberseguridad</h1>
+      <p>Dashboard Ejecutivo · Secretaría de TI · República de Honduras</p>
+    </div>
+    <div class="topbar-right">
+      <div class="badge-live">
+        <span class="dot"></span> Sistema Activo
+      </div>
+      <div class="user-chip">
+        <div class="avatar">A</div>
+        <span>Analista SOC</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- FILTERS -->
+    <div class="filters-bar">
+      <label><i class="fa-solid fa-calendar-days" style="color:var(--gold)"></i>&nbsp; Año</label>
+      <select id="filtroAnio" onchange="aplicarFiltros()">
+        <option value="todos">Todos (2022–2024)</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+      </select>
+      <div class="filter-sep"></div>
+      <label><i class="fa-solid fa-layer-group" style="color:var(--gold)"></i>&nbsp; Severidad</label>
+      <select id="filtroSev" onchange="aplicarFiltros()">
+        <option value="todos">Todas</option>
+        <option value="Crítica">Crítica</option>
+        <option value="Alta">Alta</option>
+        <option value="Media">Media</option>
+        <option value="Baja">Baja</option>
+      </select>
+      <div class="filter-sep"></div>
+      <label><i class="fa-solid fa-building" style="color:var(--gold)"></i>&nbsp; Departamento</label>
+      <select id="filtroDep" onchange="aplicarFiltros()">
+        <option value="todos">Todos</option>
+        <option>Recursos Humanos</option>
+        <option>Finanzas</option>
+        <option>Jurídico</option>
+        <option>Comunicaciones</option>
+        <option>Dirección General</option>
+        <option>Operaciones</option>
+        <option>Tecnología</option>
+        <option>Planificación</option>
+      </select>
+      <div class="filter-sep"></div>
+      <label><i class="fa-solid fa-circle-half-stroke" style="color:var(--gold)"></i>&nbsp; Estado</label>
+      <select id="filtroEstado" onchange="aplicarFiltros()">
+        <option value="todos">Todos</option>
+        <option>Cerrado</option>
+        <option>Resuelto</option>
+        <option>En investigación</option>
+        <option>Contenido</option>
+      </select>
+      <button class="btn-filter" onclick="resetFiltros()"><i class="fa-solid fa-rotate-left"></i> Restablecer</button>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fa-solid fa-shield-exclamation"></i></div>
+        <div class="kpi-label">Total Incidentes</div>
+        <div class="kpi-value" id="kpi-total">100</div>
+        <div class="kpi-sub"><i class="fa-solid fa-arrow-trend-down arrow-down"></i> Período 2022–2024</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card navy">
+        <div class="kpi-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+        <div class="kpi-label">Impacto Total USD</div>
+        <div class="kpi-value" id="kpi-impacto">$2.54M</div>
+        <div class="kpi-sub"><i class="fa-solid fa-circle-info"></i> Daño económico estimado</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-icon"><i class="fa-solid fa-skull-crossbones"></i></div>
+        <div class="kpi-label">Incidentes Críticos</div>
+        <div class="kpi-value" id="kpi-criticos">4</div>
+        <div class="kpi-sub"><i class="fa-solid fa-arrow-trend-up arrow-up"></i> Máxima prioridad</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div class="kpi-label">Resp. Promedio</div>
+        <div class="kpi-value" id="kpi-resp">31.5h</div>
+        <div class="kpi-sub"><i class="fa-solid fa-clock"></i> Horas hasta primera acción</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="kpi-label">Tasa Resolución</div>
+        <div class="kpi-value" id="kpi-tasa">79%</div>
+        <div class="kpi-sub"><i class="fa-solid fa-arrow-trend-up" style="color:var(--green)"></i> Cerrados + Resueltos</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon"><i class="fa-solid fa-spinner"></i></div>
+        <div class="kpi-label">Casos Activos</div>
+        <div class="kpi-value" id="kpi-activos">21</div>
+        <div class="kpi-sub"><i class="fa-solid fa-triangle-exclamation" style="color:var(--orange)"></i> En investigación / Contenidos</div>
+        <div class="kpi-glow"></div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <!-- Bar chart: por tipo -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <h3><i class="fa-solid fa-chart-bar" style="color:var(--gold);margin-right:6px"></i>Incidentes por Tipo</h3>
+            <p>Frecuencia de cada categoría de amenaza</p>
+          </div>
+          <span class="chart-badge">2022–2024</span>
+        </div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chartTipo"></canvas>
+        </div>
+      </div>
+      <!-- Line chart: tendencia anual -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <h3><i class="fa-solid fa-chart-line" style="color:var(--gold);margin-right:6px"></i>Tendencia Anual</h3>
+            <p>Evolución 2022 → 2024</p>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chartAnio"></canvas>
+        </div>
+      </div>
+      <!-- Pie: severidad -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <h3><i class="fa-solid fa-chart-pie" style="color:var(--gold);margin-right:6px"></i>Severidad</h3>
+            <p>Distribución por nivel de riesgo</p>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:160px">
+          <canvas id="chartSev"></canvas>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+          <span style="font-size:10px;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#c0392b;display:inline-block"></span>Crítica 4%</span>
+          <span style="font-size:10px;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#e67e22;display:inline-block"></span>Alta 28%</span>
+          <span style="font-size:10px;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#2980b9;display:inline-block"></span>Media 41%</span>
+          <span style="font-size:10px;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#27ae60;display:inline-block"></span>Baja 27%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <h3><i class="fa-solid fa-table-list" style="color:var(--gold);margin-right:6px"></i>Registro de Incidentes</h3>
+            <p>Últimos registros con formato condicional por severidad</p>
+          </div>
+          <span class="chart-badge" id="tabla-count">100 registros</span>
+        </div>
+        <div class="tbl-wrap">
+          <table id="tablaIncidentes">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Severidad</th>
+                <th>Estado</th>
+                <th>Departamento</th>
+                <th>Analista</th>
+                <th>Impacto USD</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mini panel: vectores + departamentos -->
+      <div class="mini-panel">
+        <div>
+          <h3><i class="fa-solid fa-route" style="color:var(--gold);margin-right:6px"></i>Vectores de Ataque</h3>
+          <p>Frecuencia por canal de entrada</p>
+        </div>
+        <div id="vectores-bars" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="border-top:1px solid #eee;padding-top:14px">
+          <h3 style="margin-bottom:4px"><i class="fa-solid fa-building-columns" style="color:var(--gold);margin-right:6px"></i>Top Departamentos</h3>
+          <p style="margin-bottom:10px">Por número de incidentes</p>
+          <div id="dep-bars" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <p>GOBIERNO DE LA REPÚBLICA DE HONDURAS · Centro de Operaciones de Ciberseguridad (SOC) · Datos 2022–2024</p>
+    <p class="stars">★ ★ ★ ★ ★</p>
+    <p>Dashboard Ejecutivo v1.0 · Diplomado IA · UTH</p>
+  </footer>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════
+// DATASET COMPLETO
+// ═══════════════════════════════════════════
+const DATA = [
+  {id:"SOC-2022-0001",fecha:"2022-08-17",tipo:"Malware",sev:"Alta",estado:"Contenido",dep:"Recursos Humanos",analista:"Carlos Mendoza",impacto:24628,anio:2022},
+  {id:"SOC-2023-0002",fecha:"2023-02-12",tipo:"Phishing",sev:"Alta",estado:"Resuelto",dep:"Finanzas",analista:"Roberto Paz",impacto:48618,anio:2023},
+  {id:"SOC-2024-0003",fecha:"2024-02-18",tipo:"Fuga de información",sev:"Baja",estado:"Resuelto",dep:"Planificación",analista:"Diego Martínez",impacto:718,anio:2024},
+  {id:"SOC-2022-0004",fecha:"2022-05-23",tipo:"Acceso no autorizado",sev:"Alta",estado:"Resuelto",dep:"Comunicaciones",analista:"Ana Hernández",impacto:28965,anio:2022},
+  {id:"SOC-2022-0005",fecha:"2022-05-27",tipo:"Ingeniería social",sev:"Media",estado:"Cerrado",dep:"Operaciones",analista:"María Castillo",impacto:3677,anio:2022},
+  {id:"SOC-2023-0006",fecha:"2023-03-09",tipo:"Vulnerabilidad crítica",sev:"Media",estado:"Cerrado",dep:"Finanzas",analista:"Diego Martínez",impacto:7482,anio:2023},
+  {id:"SOC-2022-0007",fecha:"2022-07-06",tipo:"Ingeniería social",sev:"Alta",estado:"En investigación",dep:"Comunicaciones",analista:"Roberto Paz",impacto:20484,anio:2022},
+  {id:"SOC-2022-0008",fecha:"2022-08-17",tipo:"Fuga de información",sev:"Alta",estado:"Resuelto",dep:"Finanzas",analista:"Roberto Paz",impacto:10212,anio:2022},
+  {id:"SOC-2023-0009",fecha:"2023-10-26",tipo:"Acceso no autorizado",sev:"Alta",estado:"Cerrado",dep:"Recursos Humanos",analista:"Laura Reyes",impacto:33788,anio:2023},
+  {id:"SOC-2023-0010",fecha:"2023-06-27",tipo:"Acceso no autorizado",sev:"Media",estado:"Contenido",dep:"Comunicaciones",analista:"Sofía López",impacto:4470,anio:2023},
+  {id:"SOC-2022-0011",fecha:"2022-03-14",tipo:"Ransomware",sev:"Baja",estado:"Cerrado",dep:"Tecnología",analista:"José Flores",impacto:335,anio:2022},
+  {id:"SOC-2023-0012",fecha:"2023-08-05",tipo:"DDoS",sev:"Alta",estado:"Resuelto",dep:"Dirección General",analista:"Ana Hernández",impacto:49134,anio:2023},
+  {id:"SOC-2024-0013",fecha:"2024-05-12",tipo:"Malware",sev:"Media",estado:"Cerrado",dep:"Jurídico",analista:"Carlos Mendoza",impacto:5230,anio:2024},
+  {id:"SOC-2022-0014",fecha:"2022-11-30",tipo:"Phishing",sev:"Baja",estado:"Cerrado",dep:"Recursos Humanos",analista:"María Castillo",impacto:412,anio:2022},
+  {id:"SOC-2022-0015",fecha:"2022-11-14",tipo:"Uso indebido de privilegios",sev:"Alta",estado:"Cerrado",dep:"Jurídico",analista:"Sofía López",impacto:13832,anio:2022},
+  {id:"SOC-2023-0016",fecha:"2023-04-18",tipo:"Vulnerabilidad crítica",sev:"Media",estado:"Resuelto",dep:"Operaciones",analista:"José Flores",impacto:9984,anio:2023},
+  {id:"SOC-2023-0017",fecha:"2023-05-04",tipo:"DDoS",sev:"Alta",estado:"Resuelto",dep:"Recursos Humanos",analista:"Laura Reyes",impacto:29660,anio:2023},
+  {id:"SOC-2024-0018",fecha:"2024-01-09",tipo:"Intrusión externa",sev:"Media",estado:"Cerrado",dep:"Finanzas",analista:"Roberto Paz",impacto:6820,anio:2024},
+  {id:"SOC-2022-0019",fecha:"2022-11-15",tipo:"Malware",sev:"Baja",estado:"En investigación",dep:"Planificación",analista:"Diego Martínez",impacto:885,anio:2022},
+  {id:"SOC-2024-0020",fecha:"2024-08-22",tipo:"Ingeniería social",sev:"Alta",estado:"Cerrado",dep:"Jurídico",analista:"Ana Hernández",impacto:40210,anio:2024},
+  {id:"SOC-2022-0021",fecha:"2022-09-10",tipo:"Vulnerabilidad crítica",sev:"Media",estado:"Cerrado",dep:"Recursos Humanos",analista:"Carlos Mendoza",impacto:4100,anio:2022},
+  {id:"SOC-2023-0022",fecha:"2023-12-01",tipo:"Fuga de información",sev:"Alta",estado:"Resuelto",dep:"Dirección General",analista:"Sofía López",impacto:38000,anio:2023},
+  {id:"SOC-2022-0023",fecha:"2022-06-20",tipo:"Ransomware",sev:"Media",estado:"Cerrado",dep:"Comunicaciones",analista:"José Flores",impacto:7100,anio:2022},
+  {id:"SOC-2024-0024",fecha:"2024-03-15",tipo:"DDoS",sev:"Baja",estado:"Cerrado",dep:"Operaciones",analista:"María Castillo",impacto:169,anio:2024},
+  {id:"SOC-2023-0025",fecha:"2023-07-22",tipo:"Phishing",sev:"Media",estado:"Cerrado",dep:"Tecnología",analista:"Roberto Paz",impacto:3400,anio:2023},
+  {id:"SOC-2023-0026",fecha:"2023-01-28",tipo:"Malware",sev:"Alta",estado:"En investigación",dep:"Finanzas",analista:"Laura Reyes",impacto:45000,anio:2023},
+  {id:"SOC-2024-0027",fecha:"2024-08-17",tipo:"Ransomware",sev:"Media",estado:"Contenido",dep:"Jurídico",analista:"Carlos Mendoza",impacto:8900,anio:2024},
+  {id:"SOC-2022-0028",fecha:"2022-04-05",tipo:"Malware",sev:"Baja",estado:"Cerrado",dep:"Planificación",analista:"Ana Hernández",impacto:220,anio:2022},
+  {id:"SOC-2023-0029",fecha:"2023-09-14",tipo:"Intrusión externa",sev:"Alta",estado:"Resuelto",dep:"Recursos Humanos",analista:"Diego Martínez",impacto:32100,anio:2023},
+  {id:"SOC-2024-0030",fecha:"2024-06-03",tipo:"Vulnerabilidad crítica",sev:"Media",estado:"En investigación",dep:"Comunicaciones",analista:"Sofía López",impacto:5600,anio:2024},
+  {id:"SOC-2024-0031",fecha:"2024-05-28",tipo:"Uso indebido de privilegios",sev:"Media",estado:"Cerrado",dep:"Tecnología",analista:"José Flores",impacto:4700,anio:2024},
+  {id:"SOC-2024-0032",fecha:"2024-07-11",tipo:"Intrusión externa",sev:"Baja",estado:"Cerrado",dep:"Finanzas",analista:"María Castillo",impacto:590,anio:2024},
+  {id:"SOC-2022-0033",fecha:"2022-10-08",tipo:"Ingeniería social",sev:"Media",estado:"Resuelto",dep:"Dirección General",analista:"Roberto Paz",impacto:6200,anio:2022},
+  {id:"SOC-2023-0034",fecha:"2023-11-19",tipo:"Phishing",sev:"Baja",estado:"Cerrado",dep:"Operaciones",analista:"Laura Reyes",impacto:310,anio:2023},
+  {id:"SOC-2022-0035",fecha:"2022-06-17",tipo:"Acceso no autorizado",sev:"Media",estado:"Contenido",dep:"Tecnología",analista:"María Castillo",impacto:1853,anio:2022},
+  {id:"SOC-2022-0036",fecha:"2022-08-29",tipo:"Vulnerabilidad crítica",sev:"Alta",estado:"En investigación",dep:"Jurídico",analista:"Carlos Mendoza",impacto:41200,anio:2022},
+  {id:"SOC-2024-0037",fecha:"2024-04-17",tipo:"Malware",sev:"Baja",estado:"Cerrado",dep:"Recursos Humanos",analista:"Ana Hernández",impacto:430,anio:2024},
+  {id:"SOC-2022-0038",fecha:"2022-01-25",tipo:"DDoS",sev:"Media",estado:"Contenido",dep:"Planificación",analista:"Diego Martínez",impacto:3100,anio:2022},
+  {id:"SOC-2023-0039",fecha:"2023-05-21",tipo:"Fuga de información",sev:"Alta",estado:"En investigación",dep:"Finanzas",analista:"Sofía López",impacto:47000,anio:2023},
+  {id:"SOC-2022-0040",fecha:"2022-12-05",tipo:"Intrusión externa",sev:"Media",estado:"Resuelto",dep:"Comunicaciones",analista:"José Flores",impacto:5800,anio:2022},
+  {id:"SOC-2023-0041",fecha:"2023-08-30",tipo:"Ransomware",sev:"Media",estado:"Cerrado",dep:"Dirección General",analista:"María Castillo",impacto:7900,anio:2023},
+  {id:"SOC-2022-0042",fecha:"2022-03-22",tipo:"Ransomware",sev:"Baja",estado:"Cerrado",dep:"Tecnología",analista:"Roberto Paz",impacto:182,anio:2022},
+  {id:"SOC-2024-0043",fecha:"2024-09-05",tipo:"Ingeniería social",sev:"Media",estado:"Cerrado",dep:"Operaciones",analista:"Laura Reyes",impacto:4200,anio:2024},
+  {id:"SOC-2023-0044",fecha:"2023-06-14",tipo:"Malware",sev:"Baja",estado:"Cerrado",dep:"Finanzas",analista:"Carlos Mendoza",impacto:650,anio:2023},
+  {id:"SOC-2022-0045",fecha:"2022-07-19",tipo:"Vulnerabilidad crítica",sev:"Alta",estado:"Resuelto",dep:"Jurídico",analista:"Ana Hernández",impacto:35600,anio:2022},
+  {id:"SOC-2024-0046",fecha:"2024-10-22",tipo:"Phishing",sev:"Baja",estado:"Cerrado",dep:"Recursos Humanos",analista:"Diego Martínez",impacto:270,anio:2024},
+  {id:"SOC-2023-0047",fecha:"2023-03-28",tipo:"Intrusión externa",sev:"Media",estado:"Cerrado",dep:"Comunicaciones",analista:"Sofía López",impacto:6100,anio:2023},
+  {id:"SOC-2022-0048",fecha:"2022-09-04",tipo:"Uso indebido de privilegios",sev:"Alta",estado:"Resuelto",dep:"Dirección General",analista:"José Flores",impacto:28300,anio:2022},
+  {id:"SOC-2024-0049",fecha:"2024-08-08",tipo:"Intrusión externa",sev:"Crítica",estado:"Cerrado",dep:"Tecnología",analista:"María Castillo",impacto:276507,anio:2024},
+  {id:"SOC-2023-0050",fecha:"2023-01-15",tipo:"DDoS",sev:"Baja",estado:"Cerrado",dep:"Planificación",analista:"Roberto Paz",impacto:195,anio:2023},
+  {id:"SOC-2022-0051",fecha:"2022-10-30",tipo:"Fuga de información",sev:"Media",estado:"Resuelto",dep:"Finanzas",analista:"Laura Reyes",impacto:8200,anio:2022},
+  {id:"SOC-2024-0052",fecha:"2024-02-07",tipo:"Malware",sev:"Alta",estado:"En investigación",dep:"Jurídico",analista:"Carlos Mendoza",impacto:33000,anio:2024},
+  {id:"SOC-2023-0053",fecha:"2023-09-03",tipo:"Ingeniería social",sev:"Baja",estado:"Cerrado",dep:"Operaciones",analista:"Ana Hernández",impacto:480,anio:2023},
+  {id:"SOC-2022-0054",fecha:"2022-04-18",tipo:"Ransomware",sev:"Baja",estado:"Cerrado",dep:"Recursos Humanos",analista:"Diego Martínez",impacto:310,anio:2022},
+  {id:"SOC-2024-0055",fecha:"2024-06-29",tipo:"Vulnerabilidad crítica",sev:"Alta",estado:"Resuelto",dep:"Comunicaciones",analista:"Sofía López",impacto:40800,anio:2024},
+  {id:"SOC-2023-0056",fecha:"2023-02-20",tipo:"Acceso no autorizado",sev:"Baja",estado:"Cerrado",dep:"Planificación",analista:"José Flores",impacto:215,anio:2023},
+  {id:"SOC-2022-0057",fecha:"2022-08-11",tipo:"Intrusión externa",sev:"Media",estado:"Cerrado",dep:"Tecnología",analista:"María Castillo",impacto:5400,anio:2022},
+  {id:"SOC-2023-0058",fecha:"2023-07-09",tipo:"Uso indebido de privilegios",sev:"Media",estado:"Resuelto",dep:"Dirección General",analista:"Roberto Paz",impacto:7300,anio:2023},
+  {id:"SOC-2024-0059",fecha:"2024-12-01",tipo:"Phishing",sev:"Alta",estado:"En investigación",dep:"Finanzas",analista:"Laura Reyes",impacto:46200,anio:2024},
+  {id:"SOC-2022-0060",fecha:"2022-05-09",tipo:"DDoS",sev:"Alta",estado:"Cerrado",dep:"Jurídico",analista:"Carlos Mendoza",impacto:37500,anio:2022},
+  {id:"SOC-2023-0061",fecha:"2023-11-05",tipo:"Malware",sev:"Baja",estado:"Cerrado",dep:"Operaciones",analista:"Ana Hernández",impacto:380,anio:2023},
+  {id:"SOC-2024-0062",fecha:"2024-03-28",tipo:"Vulnerabilidad crítica",sev:"Media",estado:"Cerrado",dep:"Recursos Humanos",analista:"Diego Martínez",impacto:6700,anio:2024},
+  {id:"SOC-2022-0063",fecha:"2022-12-19",tipo:"Fuga de información",sev:"Media",estado:"Resuelto",dep:"Comunicaciones",analista:"Sofía López",impacto:7100,anio:2022},
+  {id:"SOC-2024-0064",fecha:"2024-07-14",tipo:"Ingeniería social",sev:"Baja",estado:"Cerrado",dep:"Tecnología",analista:"José Flores",impacto:290,anio:2024},
+  {id:"SOC-2023-0065",fecha:"2023-04-02",tipo:"Ransomware",sev:"Alta",estado:"Resuelto",dep:"Planificación",analista:"María Castillo",impacto:43900,anio:2023},
+  {id:"SOC-2022-0066",fecha:"2022-02-14",tipo:"Intrusión externa",sev:"Baja",estado:"Cerrado",dep:"Finanzas",analista:"Roberto Paz",impacto:410,anio:2022},
+  {id:"SOC-2024-0067",fecha:"2024-05-05",tipo:"Acceso no autorizado",sev:"Media",estado:"Cerrado",dep:"Jurídico",analista:"Laura Reyes",impacto:3900,anio:2024},
+  {id:"SOC-2023-0068",fecha:"2023-10-11",tipo:"Phishing",sev:"Baja",estado:"Cerrado",dep:"Dirección General",analista:"Carlos Mendoza",impacto:185,anio:2023},
+  {id:"SOC-2022-0069",fecha:"2022-06-28",tipo:"Uso indebido de privilegios",sev:"Media",estado:"Cerrado",dep:"Operaciones",analista:"Ana Hernández",impacto:4800,anio:2022},
+  {id:"SOC-2022-0070",fecha:"2022-11-07",tipo:"Uso indebido de privilegios",sev:"Crítica",estado:"Cerrado",dep:"Recursos Humanos",analista:"Diego Martínez",impacto:438873,anio:2022},
+  {id:"SOC-2024-0071",fecha:"2024-08-19",tipo:"DDoS",sev:"Media",estado:"En investigación",dep:"Comunicaciones",analista:"Sofía López",impacto:5100,anio:2024},
+  {id:"SOC-2023-0072",fecha:"2023-05-29",tipo:"Malware",sev:"Alta",estado:"Resuelto",dep:"Tecnología",analista:"José Flores",impacto:31400,anio:2023},
+  {id:"SOC-2022-0073",fecha:"2022-09-23",tipo:"Vulnerabilidad crítica",sev:"Baja",estado:"Cerrado",dep:"Planificación",analista:"María Castillo",impacto:450,anio:2022},
+  {id:"SOC-2024-0074",fecha:"2024-10-30",tipo:"Fuga de información",sev:"Alta",estado:"Resuelto",dep:"Finanzas",analista:"Roberto Paz",impacto:42700,anio:2024},
+  {id:"SOC-2023-0075",fecha:"2023-06-08",tipo:"Ingeniería social",sev:"Media",estado:"Cerrado",dep:"Jurídico",analista:"Laura Reyes",impacto:6500,anio:2023},
+  {id:"SOC-2022-0076",fecha:"2022-03-31",tipo:"Ransomware",sev:"Media",estado:"Resuelto",dep:"Dirección General",analista:"Carlos Mendoza",impacto:8100,anio:2022},
+  {id:"SOC-2024-0077",fecha:"2024-01-25",tipo:"Intrusión externa",sev:"Baja",estado:"Cerrado",dep:"Operaciones",analista:"Ana Hernández",impacto:320,anio:2024},
+  {id:"SOC-2023-0078",fecha:"2023-12-14",tipo:"Acceso no autorizado",sev:"Alta",estado:"Cerrado",dep:"Recursos Humanos",analista:"Diego Martínez",impacto:35200,anio:2023},
+  {id:"SOC-2022-0079",fecha:"2022-01-16",tipo:"Ransomware",sev:"Baja",estado:"Resuelto",dep:"Dirección General",analista:"Carlos Mendoza",impacto:885,anio:2022},
+  {id:"SOC-2024-0080",fecha:"2024-06-17",tipo:"DDoS",sev:"Media",estado:"Cerrado",dep:"Tecnología",analista:"Sofía López",impacto:5700,anio:2024},
+  {id:"SOC-2023-0081",fecha:"2023-08-21",tipo:"Uso indebido de privilegios",sev:"Alta",estado:"Resuelto",dep:"Comunicaciones",analista:"José Flores",impacto:29100,anio:2023},
+  {id:"SOC-2024-0082",fecha:"2024-09-14",tipo:"Malware",sev:"Baja",estado:"Cerrado",dep:"Planificación",analista:"María Castillo",impacto:195,anio:2024},
+  {id:"SOC-2022-0083",fecha:"2022-07-25",tipo:"Phishing",sev:"Media",estado:"Cerrado",dep:"Finanzas",analista:"Roberto Paz",impacto:4300,anio:2022},
+  {id:"SOC-2023-0084",fecha:"2023-04-17",tipo:"Fuga de información",sev:"Crítica",estado:"Cerrado",dep:"Jurídico",analista:"Laura Reyes",impacto:315990,anio:2023},
+  {id:"SOC-2022-0085",fecha:"2022-10-14",tipo:"Vulnerabilidad crítica",sev:"Baja",estado:"Cerrado",dep:"Operaciones",analista:"Carlos Mendoza",impacto:390,anio:2022},
+  {id:"SOC-2023-0086",fecha:"2023-03-05",tipo:"Intrusión externa",sev:"Media",estado:"Resuelto",dep:"Recursos Humanos",analista:"Ana Hernández",impacto:6900,anio:2023},
+  {id:"SOC-2023-0087",fecha:"2023-09-28",tipo:"Fuga de información",sev:"Crítica",estado:"En investigación",dep:"Dirección General",analista:"Diego Martínez",impacto:405666,anio:2023},
+  {id:"SOC-2022-0088",fecha:"2022-12-08",tipo:"Ingeniería social",sev:"Baja",estado:"Cerrado",dep:"Tecnología",analista:"Sofía López",impacto:260,anio:2022},
+  {id:"SOC-2024-0089",fecha:"2024-02-25",tipo:"DDoS",sev:"Alta",estado:"Cerrado",dep:"Comunicaciones",analista:"José Flores",impacto:38900,anio:2024},
+  {id:"SOC-2023-0090",fecha:"2023-07-31",tipo:"Ransomware",sev:"Baja",estado:"Cerrado",dep:"Planificación",analista:"María Castillo",impacto:175,anio:2023},
+  {id:"SOC-2022-0091",fecha:"2022-04-27",tipo:"Malware",sev:"Media",estado:"Resuelto",dep:"Finanzas",analista:"Roberto Paz",impacto:7600,anio:2022},
+  {id:"SOC-2024-0092",fecha:"2024-08-05",tipo:"Uso indebido de privilegios",sev:"Baja",estado:"Cerrado",dep:"Jurídico",analista:"Laura Reyes",impacto:415,anio:2024},
+  {id:"SOC-2023-0093",fecha:"2023-10-19",tipo:"Acceso no autorizado",sev:"Media",estado:"Cerrado",dep:"Operaciones",analista:"Carlos Mendoza",impacto:4600,anio:2023},
+  {id:"SOC-2022-0094",fecha:"2022-08-03",tipo:"Phishing",sev:"Alta",estado:"Cerrado",dep:"Recursos Humanos",analista:"Ana Hernández",impacto:39700,anio:2022},
+  {id:"SOC-2024-0095",fecha:"2024-12-08",tipo:"Intrusión externa",sev:"Media",estado:"En investigación",dep:"Dirección General",analista:"Diego Martínez",impacto:5900,anio:2024},
+  {id:"SOC-2023-0096",fecha:"2023-01-09",tipo:"Vulnerabilidad crítica",sev:"Baja",estado:"Cerrado",dep:"Tecnología",analista:"Sofía López",impacto:285,anio:2023},
+  {id:"SOC-2022-0097",fecha:"2022-11-21",tipo:"Fuga de información",sev:"Media",estado:"Cerrado",dep:"Comunicaciones",analista:"José Flores",impacto:7800,anio:2022},
+  {id:"SOC-2024-0098",fecha:"2024-04-30",tipo:"Malware",sev:"Alta",estado:"Resuelto",dep:"Finanzas",analista:"María Castillo",impacto:44100,anio:2024},
+  {id:"SOC-2023-0099",fecha:"2023-06-23",tipo:"DDoS",sev:"Media",estado:"Cerrado",dep:"Planificación",analista:"Roberto Paz",impacto:5200,anio:2023},
+  {id:"SOC-2024-0100",fecha:"2024-Crítica-15",tipo:"Ingeniería social",sev:"Crítica",estado:"Cerrado",dep:"Jurídico",analista:"Laura Reyes",impacto:n,anio:2024}
+];
+
+// Fix last record
+DATA[DATA.length-1] = {id:"SOC-2024-0100",fecha:"2024-11-15",tipo:"Ingeniería social",sev:"Crítica",estado:"Cerrado",dep:"Jurídico",analista:"Laura Reyes",impacto:312000,anio:2024};
+
+// ═══════════════════════════════════════════
+// CHARTS SETUP
+// ═══════════════════════════════════════════
+const GOLD='#ad8411', NAVY='#1a3a6b', RED='#c0392b', ORANGE='#e67e22', GREEN='#27ae60', BLUE='#2980b9';
+Chart.defaults.font.family = 'Georgia, serif';
+Chart.defaults.font.size = 11;
+
+let chartTipo, chartAnio, chartSev;
+
+function buildCharts(data) {
+  // --- Tipo ---
+  const tipoCount = {};
+  data.forEach(d=>{ tipoCount[d.tipo]=(tipoCount[d.tipo]||0)+1; });
+  const tipoSorted = Object.entries(tipoCount).sort((a,b)=>b[1]-a[1]);
+  const tipoLabels = tipoSorted.map(x=>x[0]);
+  const tipoVals   = tipoSorted.map(x=>x[1]);
+
+  if(chartTipo) chartTipo.destroy();
+  chartTipo = new Chart(document.getElementById('chartTipo'), {
+    type:'bar',
+    data:{
+      labels: tipoLabels,
+      datasets:[{
+        data: tipoVals,
+        backgroundColor: tipoVals.map((_,i)=> i===0?GOLD: i===1?NAVY: i===2?RED: `rgba(26,58,107,${0.55+i*0.04})`),
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>' '+c.raw+' incidentes'}} },
+      scales:{
+        x:{ grid:{display:false}, ticks:{maxRotation:30, font:{size:9}} },
+        y:{ grid:{color:'#f0f0f0'}, beginAtZero:true, ticks:{stepSize:2} }
+      }
+    }
+  });
+
+  // --- Tendencia anual ---
+  const anioCount = {2022:0,2023:0,2024:0};
+  data.forEach(d=>{ if(anioCount[d.anio]!==undefined) anioCount[d.anio]++; });
+
+  if(chartAnio) chartAnio.destroy();
+  chartAnio = new Chart(document.getElementById('chartAnio'), {
+    type:'bar',
+    data:{
+      labels:['2022','2023','2024'],
+      datasets:[{
+        label:'Incidentes',
+        data: Object.values(anioCount),
+        backgroundColor:[NAVY, GOLD, `rgba(173,132,17,0.6)`],
+        borderRadius:8, borderSkipped:false
+      },{
+        label:'Tendencia',
+        data: Object.values(anioCount),
+        type:'line',
+        borderColor: RED,
+        backgroundColor:'rgba(192,57,43,.08)',
+        fill:true,
+        tension:.4,
+        pointBackgroundColor: RED,
+        pointRadius:5
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom', labels:{font:{size:9}, boxWidth:10}} },
+      scales:{
+        x:{ grid:{display:false} },
+        y:{ grid:{color:'#f0f0f0'}, beginAtZero:true }
+      }
+    }
+  });
+
+  // --- Severidad (pie) ---
+  const sevCount = {};
+  data.forEach(d=>{ sevCount[d.sev]=(sevCount[d.sev]||0)+1; });
+  const sevOrder = ['Crítica','Alta','Media','Baja'];
+  const sevVals  = sevOrder.map(s=>sevCount[s]||0);
+
+  if(chartSev) chartSev.destroy();
+  chartSev = new Chart(document.getElementById('chartSev'), {
+    type:'doughnut',
+    data:{
+      labels: sevOrder,
+      datasets:[{
+        data: sevVals,
+        backgroundColor:[RED, ORANGE, BLUE, GREEN],
+        borderWidth:2, borderColor:'#fff', hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw} (${Math.round(c.raw/data.length*100)}%)`}}
+      },
+      cutout:'65%'
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════
+function sevClass(s){ return {Crítica:'sev-critica',Alta:'sev-alta',Media:'sev-media',Baja:'sev-baja'}[s]||''; }
+function estClass(e){
+  if(e==='Cerrado') return 'estado-cerrado';
+  if(e==='Resuelto') return 'estado-resuelto';
+  if(e==='En investigación') return 'estado-activo';
+  return 'estado-contenido';
+}
+function buildTable(data) {
+  const tbody = document.getElementById('tabla-body');
+  tbody.innerHTML = '';
+  data.slice(0,15).forEach(d=>{
+    tbody.innerHTML += `<tr>
+      <td style="font-size:10px;color:var(--gray-text)">${d.id}</td>
+      <td>${d.fecha}</td>
+      <td>${d.tipo}</td>
+      <td><span class="sev-badge ${sevClass(d.sev)}">${d.sev}</span></td>
+      <td><span class="estado-badge ${estClass(d.estado)}">${d.estado}</span></td>
+      <td>${d.dep}</td>
+      <td>${d.analista}</td>
+      <td style="font-weight:bold;color:${d.impacto>100000?RED:d.impacto>30000?ORANGE:d.impacto>10000?NAVY:'var(--black)'}">
+        $${d.impacto.toLocaleString()}
+      </td>
+    </tr>`;
+  });
+  document.getElementById('tabla-count').textContent = data.length + ' registros';
+}
+
+// ═══════════════════════════════════════════
+// MINI BARS
+// ═══════════════════════════════════════════
+function buildMiniBars(data) {
+  // Vectores — usamos datos fijos del dataset original
+  const vectorData = [
+    {label:'Insider',v:20},
+    {label:'Correo electrónico',v:16},
+    {label:'Acceso remoto',v:15},
+    {label:'USB/Disp. externo',v:12},
+    {label:'Terceros/Proveedores',v:11},
+    {label:'VPN',v:10},
+    {label:'Web',v:10},
+    {label:'Red interna',v:6},
+  ];
+  const maxV = 20;
+  document.getElementById('vectores-bars').innerHTML = vectorData.map(x=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>${x.label}</span><span>${x.v}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(x.v/maxV*100).toFixed(0)}%"></div></div>
+    </div>`).join('');
+
+  // Departamentos from filtered data
+  const depCount = {};
+  data.forEach(d=>{ depCount[d.dep]=(depCount[d.dep]||0)+1; });
+  const depSorted = Object.entries(depCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxD = depSorted[0]?.[1] || 1;
+  document.getElementById('dep-bars').innerHTML = depSorted.map(([dep,cnt])=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>${dep}</span><span>${cnt}</span></div>
+      <div class="bar-track"><div class="bar-fill gold" style="width:${(cnt/maxD*100).toFixed(0)}%"></div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// KPI UPDATE
+// ═══════════════════════════════════════════
+function updateKPIs(data) {
+  const total   = data.length;
+  const impacto = data.reduce((s,d)=>s+d.impacto,0);
+  const criticos= data.filter(d=>d.sev==='Crítica').length;
+  const resueltos=data.filter(d=>d.estado==='Cerrado'||d.estado==='Resuelto').length;
+  const activos = data.filter(d=>d.estado==='En investigación'||d.estado==='Contenido').length;
+
+  document.getElementById('kpi-total').textContent   = total;
+  document.getElementById('kpi-impacto').textContent = impacto>=1000000?'$'+(impacto/1000000).toFixed(2)+'M':'$'+impacto.toLocaleString();
+  document.getElementById('kpi-criticos').textContent= criticos;
+  document.getElementById('kpi-resp').textContent    = '31.5h';
+  document.getElementById('kpi-tasa').textContent    = total>0?Math.round(resueltos/total*100)+'%':'—';
+  document.getElementById('kpi-activos').textContent = activos;
+}
+
+// ═══════════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════════
+function filteredData() {
+  const anio   = document.getElementById('filtroAnio').value;
+  const sev    = document.getElementById('filtroSev').value;
+  const dep    = document.getElementById('filtroDep').value;
+  const estado = document.getElementById('filtroEstado').value;
+  return DATA.filter(d=>{
+    if(anio   !=='todos' && d.anio   !==parseInt(anio)) return false;
+    if(sev    !=='todos' && d.sev    !==sev)            return false;
+    if(dep    !=='todos' && d.dep    !==dep)            return false;
+    if(estado !=='todos' && d.estado !==estado)         return false;
+    return true;
+  });
+}
+function aplicarFiltros() {
+  const data = filteredData();
+  updateKPIs(data);
+  buildCharts(data);
+  buildTable(data);
+  buildMiniBars(data);
+}
+function resetFiltros() {
+  ['filtroAnio','filtroSev','filtroDep','filtroEstado'].forEach(id=>{ document.getElementById(id).value='todos'; });
+  aplicarFiltros();
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+aplicarFiltros();
+</script>
+</body>
+</html>
