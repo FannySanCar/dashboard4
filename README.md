@@ -13,9 +13,17 @@
 Dashboard ejecutivo desarrollado como parte del **Diplomado en Inteligencia Artificial**
 de la Universidad Tecnológica de Honduras (UTH) — Actividad Práctica 4.
 
-El dashboard visualiza **100 incidentes de seguridad** del Centro de Operaciones de
-Ciberseguridad (SOC) gubernamental durante el período **2022–2024**, permitiendo análisis
-estratégico para la toma de decisiones institucionales en materia de ciberseguridad.
+> 🔔 **Nota importante:** Los datos utilizados en este dashboard son **completamente ficticios**,
+> generados con apoyo de Inteligencia Artificial (Claude - Anthropic) con fines exclusivamente
+> académicos. Simulan el entorno de un Centro de Operaciones de Ciberseguridad (SOC) gubernamental
+> durante el período 2022–2024 y **no representan incidentes reales** de ninguna institución pública
+> ni privada de Honduras.
+
+El objetivo del proyecto es demostrar la capacidad de:
+- Generar y analizar datos ficticios con IA
+- Construir un dashboard ejecutivo profesional
+- Publicar una aplicación web mediante GitHub Pages
+- Aplicar la identidad gráfica institucional oficial
 
 ---
 
@@ -24,26 +32,26 @@ estratégico para la toma de decisiones institucionales en materia de cibersegur
 | Sección | Descripción |
 |---|---|
 | 📊 **Dashboard** | KPIs ejecutivos, gráficos de tendencia y tabla resumen con filtros |
-| ⚠️ **Incidentes** | Registro completo de los 100 incidentes con 4 filtros avanzados |
+| ⚠️ **Incidentes** | Registro completo de los 100 incidentes simulados con 4 filtros |
 | 📈 **Análisis** | Vectores de ataque, impacto económico y distribución por origen |
-| 👥 **Analistas** | Métricas de rendimiento individual por analista SOC |
-| 🖥️ **Sistemas** | Exposición y nivel de riesgo por sistema institucional |
+| 👥 **Analistas** | Métricas de rendimiento individual por analista SOC (ficticios) |
+| 🖥️ **Sistemas** | Exposición y nivel de riesgo por sistema institucional (simulado) |
 
 ---
 
-## 📊 Indicadores Clave del Período 2022–2024
+## 📊 Indicadores del Dataset Simulado (2022–2024)
 
 | Indicador | Valor |
 |---|---|
-| Total de incidentes registrados | **100** |
-| Impacto económico estimado | **$2.54M** |
-| Tasa de resolución | **79%** |
+| Total de incidentes generados | **100** |
+| Impacto económico estimado (ficticio) | **$2.54M** |
+| Tasa de resolución simulada | **79%** |
 | Incidentes de severidad crítica | **4** |
-| Incidentes activos (en investigación) | **21** |
+| Incidentes activos simulados | **21** |
 | Tiempo promedio de respuesta | **31.5 horas** |
-| Analistas evaluados | **8** |
-| Sistemas institucionales monitoreados | **10** |
-| Departamentos analizados | **8** |
+| Analistas ficticios evaluados | **8** |
+| Sistemas institucionales simulados | **10** |
+| Departamentos simulados | **8** |
 | Vectores de ataque identificados | **8** |
 
 ---
@@ -71,7 +79,7 @@ Desarrollado respetando la **Identidad Gráfica Oficial del Gobierno de la Repú
 | Color de texto | Negro institucional `#231f20` |
 | Tipografía principal | Georgia Bold |
 | Tipografía secundaria | Georgia Regular |
-| Escudo | Escudo Nacional de Honduras (embebido) |
+| Escudo | Escudo Nacional de Honduras (embebido en base64) |
 
 ---
 
@@ -85,8 +93,8 @@ Desarrollado respetando la **Identidad Gráfica Oficial del Gobierno de la Repú
 | **Font Awesome 6.5** | Iconografía profesional |
 | **GitHub Pages** | Publicación y hospedaje web gratuito |
 
-> 💡 No requiere frameworks ni librerías externas adicionales.
-> El archivo `index.html` es completamente autocontenido.
+> 💡 No requiere frameworks ni librerías adicionales. El archivo `index.html`
+> es completamente autocontenido — datos, escudo e imágenes están embebidos directamente.
 
 ---
 
@@ -94,12 +102,11 @@ Desarrollado respetando la **Identidad Gráfica Oficial del Gobierno de la Repú
 
 ```
 📦 repositorio/
- ┣ 📄 index.html     ← Dashboard principal (datos y escudo embebidos)
+ ┣ 📄 index.html     ← Dashboard principal (datos y recursos embebidos)
  ┗ 📄 README.md      ← Documentación del proyecto
 ```
 
 > ✅ No se requiere subir archivos Excel ni imágenes adicionales.
-> Todos los datos y recursos están embebidos directamente en el `index.html`.
 
 ---
 
@@ -114,13 +121,15 @@ Desarrollado respetando la **Identidad Gráfica Oficial del Gobierno de la Repú
 
 ---
 
-## 🤖 Uso de Inteligencia Artificial
+## 🤖 Proceso de Desarrollo con Inteligencia Artificial
 
-Este proyecto fue desarrollado con apoyo de herramientas de Inteligencia Artificial:
-
-- **Claude (Anthropic)** — Análisis exploratorio de datos (EDA), identificación de
-  indicadores, generación del dashboard HTML y aplicación del kit de marca institucional
-- **Gemini Live** — Aprendizaje asistido de GitHub (Actividad A del Diplomado)
+| Etapa | Herramienta IA | Descripción |
+|---|---|---|
+| Generación del dataset | **Claude (Anthropic)** | Creación de 100 registros ficticios de incidentes SOC |
+| Auditoría de calidad | **Claude (Anthropic)** | EDA, detección de anomalías y validación del dataset |
+| Análisis estratégico | **Claude (Anthropic)** | Identificación de KPIs e indicadores relevantes |
+| Desarrollo del dashboard | **Claude (Anthropic)** | Generación del HTML, CSS y JS con kit de marca |
+| Aprendizaje de GitHub | **Gemini Live** | Actividad A del Diplomado — aprendizaje asistido |
 
 ---
 
@@ -137,10 +146,11 @@ Este proyecto fue desarrollado con apoyo de herramientas de Inteligencia Artific
 
 ---
 
-## 📄 Licencia
+## ⚠️ Aviso Legal
 
-Proyecto académico desarrollado con fines educativos para el
-Diplomado en Inteligencia Artificial de la UTH.
+Este es un proyecto académico con datos completamente ficticios.
+No representa, refleja ni expone información real de ninguna institución gubernamental
+ni privada de Honduras. Desarrollado exclusivamente con fines educativos.
 
 ---
 
